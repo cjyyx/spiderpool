@@ -1,0 +1,21 @@
+functionlist=[
+    '''
+#调参
+share.threadnum_max=share.threadnum_max
+share.checkinterval=share.checkinterval
+share.trytimes=share.trytimes
+    ''',
+    '''
+#打印失败爬虫池
+for each in share.failedpool:
+    print(each.description)
+    ''',
+    '''
+#把失败爬虫池并入爬虫列表中
+share.retry_failedspiders()
+    ''',
+    '''
+#再次开启爬虫
+share.run()
+    '''
+]
