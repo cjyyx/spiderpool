@@ -1,14 +1,14 @@
 functionlist=[
     '''
 #调参
-share.threadnum_max=share.threadnum_max
-share.checkinterval=share.checkinterval
-share.trytimes=share.trytimes
+share.threadnum_max
+share.checkinterval
+share.trytimes
     ''',
     '''
-#打印失败爬虫池
+#打印失败爬虫描述
 for each in share.failedpool:
-    print(each.description)
+    print(each.type+':'+each.description)
     ''',
     '''
 #把失败爬虫池并入爬虫列表中
@@ -17,5 +17,18 @@ share.retry_failedspiders()
     '''
 #再次开启爬虫
 share.run()
+    ''',
+    '''
+#输出失败爬虫日志
+share.output_failedspiders_log()
+    ''',
+    '''
+#一键停止
+share.threadnum_max=-1
+    ''',
+    '''
+#保存数据
+#要求定义SpiderPool对象的save、datas
+share.save(share.datas)    
     '''
 ]

@@ -1,5 +1,6 @@
 import threading
 import time
+import traceback#处理异常
 
 from .controller1 import *
 from .functionlist import functionlist
@@ -101,9 +102,9 @@ class SpiderPool:
             self.showlist['爬虫失败率(%)'] = failedrate
             self.showlist['爬虫平均用时(秒)'] = averageSpideRunTime
             if speed!=0:
-                self.showlist['完成爬虫列表内爬虫还需时间(秒)'] = round(len(self.readypool)/speed,0)
+                self.showlist['完成所有爬虫需时间(秒)'] = round((len(self.readypool)+self.threadnum_now)/speed,0)
             else:
-                self.showlist['完成爬虫列表内爬虫还需时间(秒)']=0
+                self.showlist['完成所有爬虫需时间(秒)']=0
 
             pretime=time.time()
             prefinishedtimes=self.finishedtimes
@@ -130,7 +131,7 @@ class SpiderPool:
 
     def put(self,spider,description='无名爬虫'):
         '''
-        传入一个对象，有run方法；或者一个toSpider修饰过的函数
+        传入一个toSpider修饰过的函数
         '''
         spider.description=description
         self.gLock.acquire()
@@ -154,9 +155,13 @@ class SpiderPool:
 
                 self.gLock.release()
                 return
-            except:
+            except Exception as e:
                 if i==trytimes-1:
                     # 失败了
+                    info = traceback.format_exc()
+                    spider.exception=info
+                    # spider.exception=info[282:]
+
                     self.gLock.acquire()
 
                     self.finishedtimes+=1
@@ -178,6 +183,18 @@ class SpiderPool:
 
         self.gLock.release()
 
+    def output_failedspiders_log(self):
+        self.gLock.acquire()
+
+        with open('failedspiders_log','w',encoding='utf-8') as f:
+            for spider in self.failedpool:
+                f.write('爬虫类型：'+spider.type+'\n')
+                f.write('爬虫描述：\n'+spider.description+'\n')
+                f.write('错误信息：\n'+spider.exception+'\n'*2)
+
+        self.gLock.release()
+
+
 
 def toSpider(func):
     '''
@@ -189,8 +206,7 @@ def toSpider(func):
         def __init__(self,func,**kwargs):
             self.kwargs=kwargs
             self.func=func
-            # for item in kwargs.items():
-            #     exec('self.%s=item[1]'%(item[0]))
+            self.type=func.__name__
 
         def run(self):
             args=''
