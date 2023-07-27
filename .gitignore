@@ -1,2 +1,4 @@
 **/__pycache__/
 **/failedspiders_log
+**/build/**
+**/spiderpool.egg-info/**
